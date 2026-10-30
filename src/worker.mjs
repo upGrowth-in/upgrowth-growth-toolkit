@@ -892,6 +892,9 @@ export default {
       if (!VERIFICATION_TOKENS.length) return json({ error: 'not configured' }, 404);
       return json({ verification_tokens: VERIFICATION_TOKENS });
     }
+    if (path === '/.well-known/openai-apps-challenge') {
+      return new Response('IADxAKpX8PdFJWQj97eBcek1JIKi0c2kYePPByWyq9Y', { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' } });
+    }
     if (path === '/.well-known/mcp-registry-auth') {
       return new Response('v=MCPv1; k=ed25519; p=Ty501sGSxSLvVyAR0DIs1TZV3SbRQKm/8998WZDUh+0=', { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=300' } });
     }
