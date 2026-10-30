@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "in.upgrowth/growth-toolkit",
+  "title": "upGrowth Growth Toolkit",
+  "description": "29 free read-only growth tools: CAC, ROAS, PPC, schema, meta tags, robots.txt and AI crawler checks.",
+  "version": "1.4.1",
+  "websiteUrl": "https://upgrowth.in/growth-toolkit-mcp/",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://upgrowth.in/connected-app/mcp"
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/upGrowth-in/upgrowth-growth-toolkit",
+    "source": "github"
+  }
+}
