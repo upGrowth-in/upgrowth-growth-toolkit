@@ -859,8 +859,27 @@ function callTool(name, a) {
   }
 }
 
+// Anonymous usage counts (Workers Analytics Engine): event, tool name, host and a coarse client family only.
+// No IP addresses, no tool inputs or outputs.
+let USAGE = null;
+function clientFamily(ua) {
+  const s = (ua || '').toLowerCase();
+  if (/openai|chatgpt/.test(s)) return 'chatgpt';
+  if (/claude|anthropic/.test(s)) return 'claude';
+  if (/gemini|google/.test(s)) return 'google';
+  if (/cursor/.test(s)) return 'cursor';
+  if (/glama/.test(s)) return 'glama';
+  if (/node|python|go-http|curl|axios|undici/.test(s)) return 'script';
+  return 'other';
+}
+function track(event, tool, host, ua) {
+  try { if (USAGE) USAGE.writeDataPoint({ blobs: [event, tool || '', host || '', clientFamily(ua)], doubles: [1], indexes: [event] }); } catch (e) { /* never block a call on metrics */ }
+}
+
 async function handleMcp(request, opts = {}) {
   const hidden = opts.hideTools || [];
+  const host = new URL(request.url).hostname;
+  const ua = request.headers.get('user-agent') || '';
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { Allow: 'POST, OPTIONS' } });
   if (request.method !== 'POST') return json({ error: 'Use POST with a JSON-RPC 2.0 body.' }, 405, { Allow: 'POST' });
   const raw = await request.text();
@@ -874,6 +893,7 @@ async function handleMcp(request, opts = {}) {
   if (id === null && method.startsWith('notifications/')) return new Response(null, { status: 202 });
   switch (method) {
     case 'initialize':
+      track('initialize', '', host, ua);
       return rpcOk(id, { protocolVersion: typeof params.protocolVersion === 'string' ? params.protocolVersion : DEFAULT_PROTOCOL,
         capabilities: { tools: { listChanged: false } }, serverInfo: { name: SERVER_NAME, title: 'upGrowth Growth Toolkit', version: SERVER_VERSION }, instructions: hidden.length ? INSTRUCTIONS.replace(' book_strategy_call when the user asks to talk to upGrowth.', '') : INSTRUCTIONS });
     case 'ping': return rpcOk(id, {});
@@ -882,6 +902,7 @@ async function handleMcp(request, opts = {}) {
       const args = params.arguments && typeof params.arguments === 'object' && !Array.isArray(params.arguments) ? params.arguments : {};
       const toolName = typeof params.name === 'string' ? params.name : '';
       if (hidden.includes(toolName)) return rpcOk(id, toolError('Unknown tool: ' + toolName));
+      track('tools/call', toolName, host, ua);
       return rpcOk(id, await callTool(toolName, args));
     }
     default: return rpcErr(id, -32601, 'Method not found: ' + method);
@@ -889,7 +910,8 @@ async function handleMcp(request, opts = {}) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
+    USAGE = (env && env.USAGE) || null;
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
     // Dedicated host for clients that read root OAuth metadata (upgrowth.in/.well-known belongs to the WordPress MCP connector).
