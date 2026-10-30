@@ -4,7 +4,7 @@ A free, public, read-only [Model Context Protocol](https://modelcontextprotocol.
 
 - **Endpoint:** `https://upgrowth.in/connected-app/mcp` (Streamable HTTP). Alias: `https://mcp.upgrowth.in/mcp`
 - **Auth:** none. No sign-up, no API key.
-- **Data:** nothing is stored or logged. 28 of the 29 tools make no outside calls; `ai_crawler_access_check` fetches only the public `robots.txt` and `llms.txt` of the domain you name.
+- **Data:** your inputs and the answers are never stored. We keep anonymous usage counts (event, tool name, host and a broad client type such as ChatGPT or Claude) in Cloudflare Workers Analytics Engine; no IP addresses. 28 of the 29 tools make no outside calls; `ai_crawler_access_check` fetches only the public `robots.txt` and `llms.txt` of the domain you name.
 - **Official MCP Registry:** `in.upgrowth/growth-toolkit`
 - **Docs and setup guide:** https://upgrowth.in/growth-toolkit-mcp/
 - **Terms:** https://upgrowth.in/growth-toolkit-terms/
