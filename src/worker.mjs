@@ -859,7 +859,8 @@ function callTool(name, a) {
   }
 }
 
-async function handleMcp(request) {
+async function handleMcp(request, opts = {}) {
+  const hidden = opts.hideTools || [];
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { Allow: 'POST, OPTIONS' } });
   if (request.method !== 'POST') return json({ error: 'Use POST with a JSON-RPC 2.0 body.' }, 405, { Allow: 'POST' });
   const raw = await request.text();
@@ -874,12 +875,14 @@ async function handleMcp(request) {
   switch (method) {
     case 'initialize':
       return rpcOk(id, { protocolVersion: typeof params.protocolVersion === 'string' ? params.protocolVersion : DEFAULT_PROTOCOL,
-        capabilities: { tools: { listChanged: false } }, serverInfo: { name: SERVER_NAME, title: 'upGrowth Growth Toolkit', version: SERVER_VERSION }, instructions: INSTRUCTIONS });
+        capabilities: { tools: { listChanged: false } }, serverInfo: { name: SERVER_NAME, title: 'upGrowth Growth Toolkit', version: SERVER_VERSION }, instructions: hidden.length ? INSTRUCTIONS.replace(' book_strategy_call when the user asks to talk to upGrowth.', '') : INSTRUCTIONS });
     case 'ping': return rpcOk(id, {});
-    case 'tools/list': return rpcOk(id, { tools: toolDefinitions() });
+    case 'tools/list': return rpcOk(id, { tools: toolDefinitions().filter((t) => !hidden.includes(t.name)) });
     case 'tools/call': {
       const args = params.arguments && typeof params.arguments === 'object' && !Array.isArray(params.arguments) ? params.arguments : {};
-      return rpcOk(id, await callTool(typeof params.name === 'string' ? params.name : '', args));
+      const toolName = typeof params.name === 'string' ? params.name : '';
+      if (hidden.includes(toolName)) return rpcOk(id, toolError('Unknown tool: ' + toolName));
+      return rpcOk(id, await callTool(toolName, args));
     }
     default: return rpcErr(id, -32601, 'Method not found: ' + method);
   }
@@ -890,7 +893,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
     // Dedicated host for clients that read root OAuth metadata (upgrowth.in/.well-known belongs to the WordPress MCP connector).
-    if (url.hostname === 'mcp.upgrowth.in' && path === '/mcp') return handleMcp(request);
+    if (url.hostname === 'mcp.upgrowth.in' && path === '/mcp') return handleMcp(request, { hideTools: ['book_strategy_call'] });
     if (path === '/.well-known/google-connected-apps') {
       if (!VERIFICATION_TOKENS.length) return json({ error: 'not configured' }, 404);
       return json({ verification_tokens: VERIFICATION_TOKENS });
