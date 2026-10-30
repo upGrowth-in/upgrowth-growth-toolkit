@@ -19,6 +19,7 @@ assert.equal(tools.length, 29, 'expected 29 tools');
 for (const t of tools) {
   assert.ok(t.title, `${t.name} has a title`);
   assert.equal(t.annotations.readOnlyHint, true, `${t.name} is read-only`);
+  assert.equal(t.annotations.title, t.title, `${t.name} has annotations.title`);
 }
 
 const call = (name, args) => rpc('tools/call', { name, arguments: args });

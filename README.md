@@ -8,7 +8,7 @@ A free, public, read-only [Model Context Protocol](https://modelcontextprotocol.
 - **Official MCP Registry:** `in.upgrowth/growth-toolkit`
 - **Docs and setup guide:** https://upgrowth.in/growth-toolkit-mcp/
 - **Terms:** https://upgrowth.in/growth-toolkit-terms/
-- **Version:** 1.4.1
+- **Version:** 1.4.2
 
 Built and maintained by [upGrowth Digital](https://upgrowth.in/), a growth marketing consultancy in Pune, India.
 
