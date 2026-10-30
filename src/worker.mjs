@@ -887,7 +887,10 @@ async function handleMcp(request) {
 
 export default {
   async fetch(request) {
-    const path = new URL(request.url).pathname.replace(/\/+$/, '');
+    const url = new URL(request.url);
+    const path = url.pathname.replace(/\/+$/, '');
+    // Dedicated host for clients that read root OAuth metadata (upgrowth.in/.well-known belongs to the WordPress MCP connector).
+    if (url.hostname === 'mcp.upgrowth.in' && path === '/mcp') return handleMcp(request);
     if (path === '/.well-known/google-connected-apps') {
       if (!VERIFICATION_TOKENS.length) return json({ error: 'not configured' }, 404);
       return json({ verification_tokens: VERIFICATION_TOKENS });
@@ -899,6 +902,7 @@ export default {
       return new Response('v=MCPv1; k=ed25519; p=Ty501sGSxSLvVyAR0DIs1TZV3SbRQKm/8998WZDUh+0=', { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=300' } });
     }
     if (path === '/connected-app/mcp') return handleMcp(request);
+    if (url.hostname !== 'upgrowth.in') return json({ error: 'not found' }, 404);
     return fetch(request); // anything else on a matched route falls through to the origin
   },
 };
