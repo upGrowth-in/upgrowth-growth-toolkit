@@ -16,7 +16,7 @@ Built and maintained by [upGrowth Digital](https://upgrowth.in/), a growth marke
 
 **Claude (all plans):** Customize > Connectors > "+ Add" > "Add custom connector". Name it upGrowth, paste the endpoint URL, choose "No sign in" under Authentication and click Add. On Team and Enterprise plans an owner adds it first under Organization settings > Connectors.
 
-**ChatGPT (Plus, Pro, Business, Enterprise, Education on the web):** Settings > Apps > Advanced settings, switch on Developer mode, click "Create app", paste the endpoint URL and choose No Authentication. In a chat, pick Developer mode from the + menu and select upGrowth.
+**ChatGPT (web):** Plugins > Add > "Add custom MCP server". Paste `https://mcp.upgrowth.in/mcp` as the server URL, set Authentication to "No authentication", then "Create as a plugin" and "Connect". In a chat, type `@upGrowth`. The ChatGPT address serves 28 tools (the call-booking tool is left out).
 
 **Gemini CLI:** `gemini mcp add --transport http upgrowth https://upgrowth.in/connected-app/mcp`, or add to `~/.gemini/settings.json`:
 
