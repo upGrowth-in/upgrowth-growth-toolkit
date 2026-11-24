@@ -1,5 +1,7 @@
 # upGrowth Growth Toolkit (MCP server)
 
+[![upGrowth-in/upgrowth-growth-toolkit MCP server](https://glama.ai/mcp/servers/upGrowth-in/upgrowth-growth-toolkit/badges/score.svg)](https://glama.ai/mcp/servers/upGrowth-in/upgrowth-growth-toolkit)
+
 A free, public, read-only [Model Context Protocol](https://modelcontextprotocol.io) server with 29 growth marketing tools. Connect it to Claude, ChatGPT, Gemini CLI or any MCP client and ask growth maths, SEO and AI-visibility questions in plain language.
 
 - **Endpoint:** `https://upgrowth.in/connected-app/mcp` (Streamable HTTP). Alias: `https://mcp.upgrowth.in/mcp`
