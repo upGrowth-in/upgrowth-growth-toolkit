@@ -11,7 +11,7 @@ A free, public, read-only [Model Context Protocol](https://modelcontextprotocol.
 - **Official MCP Registry:** `in.upgrowth/growth-toolkit`
 - **Docs and setup guide:** https://upgrowth.in/growth-toolkit-mcp/
 - **Terms:** https://upgrowth.in/growth-toolkit-terms/
-- **Version:** 1.4.2
+- **Version:** 1.5.0
 
 Built and maintained by [upGrowth Digital](https://upgrowth.in/), a growth marketing consultancy in Pune, India.
 
@@ -92,6 +92,17 @@ claude mcp add --transport http upgrowth https://upgrowth.in/connected-app/mcp
 
 Every tool is annotated `readOnlyHint: true` and `destructiveHint: false`.
 
+## Skills
+
+The server also publishes 2 [Agent Skills](https://agentskills.io/specification) through the MCP [Skills extension](https://modelcontextprotocol.io/extensions/skills/overview) (`io.modelcontextprotocol/skills`). A skill is an ordered workflow across the tools above. Clients that support the extension find them with `skills/list`; any client can read them as resources.
+
+| Skill | URI | What it does |
+|---|---|---|
+| `ai-visibility-check` | `skill://ai-visibility-check/SKILL.md` | Checks whether AI assistants can read a site, then works through robots.txt, schema and meta tag fixes |
+| `paid-growth-diagnostic` | `skill://paid-growth-diagnostic/SKILL.md` | Runs unit economics, affordable CAC, ROAS and budget in order and ends with a verdict |
+
+Skills are text only (no scripts). Their source is in `skills/`.
+
 ## Example prompts
 
 - "My CAC is Rs 2,000, LTV Rs 9,000 and monthly margin per customer Rs 750. What's my LTV:CAC and payback?"
@@ -104,8 +115,10 @@ Every tool is annotated `readOnlyHint: true` and `destructiveHint: false`.
 ## Repository layout
 
 ```
-src/worker.mjs          Cloudflare Worker (the deployed server, single file, data inlined)
-php/mcp.php             Equivalent PHP implementation (same tools, same output)
+src/worker.mjs          Cloudflare Worker (the deployed server, single file, data and skills inlined)
+skills/                 Source of the skills; `node scripts/sync-skills.mjs` copies them into the Worker
+scripts/sync-skills.mjs Inlines skills/ into src/worker.mjs
+php/mcp.php             PHP implementation of the same tools (legacy protocol revisions only, no skills)
 php/data/               Growth Moves dataset used by find_growth_moves (PHP copy)
 tests/smoke.mjs         Smoke test against src/worker.mjs
 server.json             Official MCP Registry entry
@@ -132,7 +145,9 @@ node tests/smoke.mjs
 ## Protocol notes
 
 - Single `POST` endpoint, JSON-RPC 2.0, JSON responses (no SSE stream needed).
-- Supports `initialize`, `tools/list`, `tools/call` and `ping`. Protocol version `2025-06-18` by default; the client's requested version is echoed when supported.
+- Serves 2 protocol eras on the same endpoint:
+  - **2026-07-28 (stateless):** `server/discover`, `tools/list`, `tools/call`, `resources/list`, `resources/read`, `skills/list` and `skills/get`. Requests carry their version in `_meta` and the `MCP-Protocol-Version` header; an unsupported version gets error `-32022` with the supported list.
+  - **2025-11-25 and earlier (`initialize` handshake):** `initialize`, `ping`, `tools/list`, `tools/call`, `resources/list` and `resources/read`. `2025-06-18` by default; the client's requested version is echoed only when it is one of `2025-11-25`, `2025-06-18`, `2025-03-26` or `2024-11-05`.
 - The public endpoint is rate limited per IP. If you need heavy use, self-host it.
 
 ## Licence
